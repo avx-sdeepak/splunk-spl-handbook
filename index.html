@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splunk SPL — Threat Hunter's Field Reference</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f0883e;
+    --accent4: #f778ba;
+    --code-bg: #1c2129;
+    --highlight: #1f6feb22;
+    --red: #f85149;
+    --yellow: #d29922;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-color: var(--border) var(--bg);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* --- TOP NAV / TOC BAR --- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13, 17, 23, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+  }
+
+  .topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    overflow-x: auto;
+  }
+
+  .topbar-inner::-webkit-scrollbar { height: 0; }
+
+  .topbar .logo {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--accent);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .topbar .sep {
+    color: var(--border);
+    flex-shrink: 0;
+  }
+
+  .topbar a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .topbar a:hover {
+    color: var(--text);
+    background: var(--highlight);
+  }
+
+  /* --- MAIN CONTENT --- */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 120px;
+  }
+
+  /* --- HERO --- */
+  .hero {
+    text-align: center;
+    padding: 60px 0 50px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 50px;
+  }
+
+  .hero h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .hero .badge {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--accent3);
+    background: rgba(240, 136, 62, 0.08);
+  }
+
+  /* --- SECTIONS --- */
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 60px 0 24px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+    scroll-margin-top: 70px;
+  }
+
+  h2 .num {
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-right: 6px;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 36px 0 14px;
+    scroll-margin-top: 70px;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent3);
+    margin: 24px 0 10px;
+  }
+
+  p {
+    margin: 10px 0;
+    color: var(--text-muted);
+  }
+
+  strong { color: var(--text); }
+
+  /* --- CODE BLOCKS --- */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 12px 0 20px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    position: relative;
+  }
+
+  pre code {
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+    color: var(--text);
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    opacity: 0;
+    transition: all 0.2s;
+  }
+
+  pre:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--accent2); border-color: var(--accent2); }
+
+  /* inline code */
+  code {
+    font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: var(--accent3);
+    border: 1px solid var(--border);
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    color: var(--text);
+  }
+
+  /* --- TABLES --- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 22px;
+    font-size: 0.9rem;
+  }
+
+  thead th {
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  tbody td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr:nth-child(even) { background: rgba(22, 27, 34, 0.5); }
+  tbody tr:hover { background: var(--highlight); }
+
+  /* --- CALLOUTS --- */
+  .callout {
+    border-left: 3px solid var(--yellow);
+    background: rgba(210, 153, 34, 0.06);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+
+  .callout.danger {
+    border-left-color: var(--red);
+    background: rgba(248, 81, 73, 0.06);
+  }
+
+  .callout.tip {
+    border-left-color: var(--accent2);
+    background: rgba(63, 185, 80, 0.06);
+  }
+
+  .callout strong { margin-right: 4px; }
+
+  /* --- HUNT CARDS --- */
+  .hunt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin: 20px 0;
+  }
+
+  .hunt-card h4 {
+    color: var(--accent4);
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+  }
+
+  .hunt-card .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-right: 6px;
+    margin-bottom: 8px;
+  }
+
+  .tag.mitre { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+  .tag.ds { background: rgba(63, 185, 80, 0.15); color: var(--accent2); }
+
+  /* --- SEARCH --- */
+  .search-wrap {
+    position: relative;
+    max-width: 400px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px 6px 32px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-wrap input:focus { border-color: var(--accent); }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    stroke: var(--text-muted);
+  }
+
+  .highlight-match {
+    background: rgba(210, 153, 34, 0.35);
+    border-radius: 2px;
+  }
+
+  /* --- BACK TO TOP --- */
+  .btt {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--accent);
+    color: var(--bg);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  .btt.visible { opacity: 1; }
+
+  /* --- SPL SYNTAX HIGHLIGHTING --- */
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .cm { color: #8b949e; font-style: italic; }
+  .num { color: #79c0ff; }
+  .op { color: #ff7b72; }
+  .field { color: #ffa657; }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .container { padding: 20px 14px 80px; }
+    pre { font-size: 0.82rem; padding: 14px; }
+    table { font-size: 0.82rem; }
+    .topbar-inner { padding: 8px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <span class="logo">SPL REF</span>
+    <span class="sep">|</span>
+    <a href="#s1">Core Search</a>
+    <a href="#s2">Filtering</a>
+    <a href="#s3">Grouping</a>
+    <a href="#s4">IP Ops</a>
+    <a href="#s5">Correlation</a>
+    <a href="#s6">Time Graphs</a>
+    <a href="#s7">Eval</a>
+    <a href="#s8">Hunt Cookbook</a>
+    <a href="#s9">Formatting</a>
+    <a href="#s10">Macros &amp; Accel</a>
+    <a href="#s11">Advanced</a>
+    <a href="#s12">Cheat Table</a>
+    <a href="#s13">Perf Rules</a>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="pageSearch" placeholder="Search this page... (Ctrl+K)" autocomplete="off">
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="container">
+<div class="hero">
+  <h1>Splunk SPL Reference</h1>
+  <p>Threat Hunter's Field Manual &mdash; from raw log parsing through statistical anomaly detection, correlation, and visualization.</p>
+  <span class="badge">Depth: Senior Threat Hunter (9+ yrs)</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1 -->
+<!-- ============================================================ -->
+<h2 id="s1"><span class="num">1.</span> Core Search Anatomy</h2>
+
+<pre><code><span class="kw">index</span>=main <span class="kw">sourcetype</span>=syslog <span class="kw">host</span>=webserver01
+| <span class="kw">where</span> status&gt;=400
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip, status
+| <span class="fn">sort</span> -count</code></pre>
+
+<p><strong>Search pipeline:</strong> <code>source data &rarr; filter &rarr; transform &rarr; output</code></p>
+<p>Every command after <code>|</code> receives the results of the previous command.</p>
+
+<h3>Search Modifiers (first pipe)</h3>
+<table>
+<thead><tr><th>Modifier</th><th>Purpose</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>index=</code></td><td>Target index</td><td><code>index=proxy OR index=firewall</code></td></tr>
+<tr><td><code>sourcetype=</code></td><td>Log type</td><td><code>sourcetype=pan:traffic</code></td></tr>
+<tr><td><code>host=</code></td><td>Originating host</td><td><code>host=dc01.corp.local</code></td></tr>
+<tr><td><code>source=</code></td><td>Log file path</td><td><code>source="/var/log/auth.log"</code></td></tr>
+<tr><td><code>earliest= / latest=</code></td><td>Time bounds</td><td><code>earliest=-24h latest=now</code></td></tr>
+<tr><td><code>NOT / !=</code></td><td>Exclusion</td><td><code>NOT src_ip=10.0.0.0/8</code></td></tr>
+<tr><td><code>IN()</code></td><td>Multi-value match</td><td><code>status IN (401, 403, 500)</code></td></tr>
+</tbody>
+</table>
+
+<h3>Time Modifiers (Inline)</h3>
+<pre><code>earliest=-7d@d latest=@d          <span class="cm"># last 7 full days</span>
+earliest=02/01/2026:00:00:00      <span class="cm"># absolute</span>
+earliest=-1h@h latest=now         <span class="cm"># last full hour to now</span>
+earliest=-30m                     <span class="cm"># sliding 30 min</span></code></pre>
+
+<table>
+<thead><tr><th>Snap Unit</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>@s @m @h @d @w @mon @y</code></td><td>Snap to second/minute/hour/day/week/month/year</td></tr>
+<tr><td><code>-1d@d</code></td><td>Start of yesterday</td></tr>
+<tr><td><code>@w0</code></td><td>Start of Sunday</td></tr>
+</tbody>
+</table>
+
+<!-- ============================================================ -->
+<!-- SECTION 2 -->
+<!-- ============================================================ -->
+<h2 id="s2"><span class="num">2.</span> Filtering &amp; Field Extraction</h2>
+
+<h3>where vs search</h3>
+<pre><code><span class="cm"># where — supports expressions, case-sensitive by default</span>
+| <span class="kw">where</span> <span class="fn">len</span>(user) &gt; 0 AND <span class="fn">like</span>(url, <span class="str">"%/admin%"</span>)
+| <span class="kw">where</span> <span class="fn">cidrmatch</span>(<span class="str">"10.0.0.0/8"</span>, src_ip)
+| <span class="kw">where</span> <span class="fn">isnull</span>(dest_port) OR dest_port=0
+| <span class="kw">where</span> <span class="fn">match</span>(user, <span class="str">"^svc_"</span>)
+
+<span class="cm"># search — simpler, wildcard-friendly, case-insensitive</span>
+| <span class="kw">search</span> src_ip=192.168.* action=blocked user!=<span class="str">"-"</span>
+| <span class="kw">search</span> NOT [| <span class="fn">inputlookup</span> whitelist.csv | <span class="kw">fields</span> src_ip]</code></pre>
+
+<h3>Field Extraction (rex)</h3>
+<pre><code><span class="cm"># Named capture group → creates field inline</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=_raw <span class="str">"(?&lt;email&gt;\w+@[\w.]+)"</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=url <span class="str">"\/(?&lt;uri_path&gt;[^?]+)\??"</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=_raw <span class="str">"User:\s+(?&lt;username&gt;[^\s,]+)"</span>
+
+<span class="cm"># Multiple captures in one pass</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=_raw <span class="str">"src=(?&lt;src&gt;\d+\.\d+\.\d+\.\d+):(?&lt;src_port&gt;\d+)\s+dst=(?&lt;dst&gt;\d+\.\d+\.\d+\.\d+):(?&lt;dst_port&gt;\d+)"</span>
+
+<span class="cm"># sed-mode replacement (mode=sed)</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=email <span class="kw">mode</span>=sed <span class="str">"s/@.*//g"</span>            <span class="cm"># strip domain</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=url <span class="kw">mode</span>=sed <span class="str">"s/\?.*//g"</span>             <span class="cm"># strip query string</span>
+
+<span class="cm"># Extract the Nth occurrence (4th octet of IP)</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=src_ip <span class="str">"^\d+\.\d+\.\d+\.(?&lt;last_octet&gt;\d+)"</span></code></pre>
+
+<h3>Regex Cheat Sheet (PCRE)</h3>
+<table>
+<thead><tr><th>Pattern</th><th>Matches</th></tr></thead>
+<tbody>
+<tr><td><code>\d+</code></td><td>One or more digits</td></tr>
+<tr><td><code>\w+</code></td><td>Word chars <code>[a-zA-Z0-9_]</code></td></tr>
+<tr><td><code>[^\s]+</code></td><td>Non-whitespace run</td></tr>
+<tr><td><code>(?i)admin</code></td><td>Case-insensitive</td></tr>
+<tr><td><code>(?:group)</code></td><td>Non-capturing group</td></tr>
+<tr><td><code>(?&lt;=src=)\d+\.\d+\.\d+\.\d+</code></td><td>Lookbehind &mdash; IP after <code>src=</code></td></tr>
+<tr><td><code>(?!10\.)(\d+\.\d+\.\d+\.\d+)</code></td><td>Negative lookahead &mdash; NOT RFC1918 starting 10.</td></tr>
+<tr><td><code>\b[A-Fa-f0-9]{32}\b</code></td><td>MD5 hash</td></tr>
+<tr><td><code>\b[A-Fa-f0-9]{64}\b</code></td><td>SHA256 hash</td></tr>
+<tr><td><code>(?:[A-Za-z0-9+/]{4}){5,}={0,2}</code></td><td>Base64 blob (min 20 encoded chars)</td></tr>
+</tbody>
+</table>
+
+<h3>regex command (filter, not extract)</h3>
+<pre><code><span class="cm"># Keep only events matching pattern</span>
+| <span class="fn">regex</span> _raw=<span class="str">"(?i)failed\s+(password|login)"</span>
+| <span class="fn">regex</span> url!=<span class="str">"^https://"</span>                       <span class="cm"># exclude HTTPS</span>
+| <span class="fn">regex</span> <span class="kw">field</span>=user <span class="str">"^(admin|root|svc_)"</span></code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 3 -->
+<!-- ============================================================ -->
+<h2 id="s3"><span class="num">3.</span> Grouping &amp; Aggregation (stats family)</h2>
+
+<h3>stats &mdash; The Workhorse</h3>
+<pre><code>| <span class="fn">stats</span> <span class="fn">count</span>                                             <span class="cm"># total events</span>
+      <span class="fn">dc</span>(src_ip) <span class="kw">as</span> unique_sources                        <span class="cm"># distinct count</span>
+      <span class="fn">values</span>(dest_port) <span class="kw">as</span> ports                          <span class="cm"># all distinct vals</span>
+      <span class="fn">list</span>(user) <span class="kw">as</span> users                                 <span class="cm"># all vals inc. dupes</span>
+      <span class="fn">sum</span>(bytes) <span class="kw">as</span> total_bytes
+      <span class="fn">avg</span>(duration) <span class="kw">as</span> avg_duration
+      <span class="fn">median</span>(response_time) <span class="kw">as</span> med_rt
+      <span class="fn">min</span>(_time) <span class="kw">as</span> first_seen
+      <span class="fn">max</span>(_time) <span class="kw">as</span> last_seen
+      <span class="fn">latest</span>(status) <span class="kw">as</span> latest_status
+      <span class="fn">earliest</span>(action) <span class="kw">as</span> first_action
+      <span class="fn">range</span>(bytes) <span class="kw">as</span> byte_spread
+      <span class="fn">stdev</span>(response_time) <span class="kw">as</span> rt_stdev
+      <span class="fn">perc95</span>(response_time) <span class="kw">as</span> p95_rt
+      <span class="kw">BY</span> src_ip, dest_ip</code></pre>
+
+<h3>eventstats &mdash; Stats Without Collapsing</h3>
+<pre><code><span class="cm"># Add global/group stats to each event, keep all events</span>
+| <span class="fn">eventstats</span> <span class="fn">avg</span>(bytes) <span class="kw">as</span> avg_bytes, <span class="fn">stdev</span>(bytes) <span class="kw">as</span> stdev_bytes <span class="kw">by</span> src_ip
+| <span class="kw">where</span> bytes &gt; (avg_bytes + 3*stdev_bytes)
+<span class="cm"># ^ Statistical outlier detection — events &gt;3 sigma above mean</span></code></pre>
+
+<h3>streamstats &mdash; Rolling / Cumulative</h3>
+<pre><code><span class="cm"># Running count of failed logins per user (resets per user)</span>
+| <span class="fn">sort</span> 0 _time
+| <span class="fn">streamstats</span> <span class="fn">count</span> <span class="kw">as</span> attempt_num <span class="kw">by</span> user
+| <span class="kw">where</span> attempt_num &gt;= 5
+
+<span class="cm"># Sliding 5-minute window — events within last 5 mins per user</span>
+| <span class="fn">streamstats</span> <span class="kw">time_window</span>=5m <span class="fn">count</span> <span class="kw">as</span> login_attempts <span class="kw">by</span> user
+| <span class="kw">where</span> login_attempts &gt; 10
+
+<span class="cm"># Time delta between consecutive events (same src_ip)</span>
+| <span class="fn">sort</span> 0 _time
+| <span class="fn">streamstats</span> <span class="kw">current</span>=f <span class="fn">last</span>(_time) <span class="kw">as</span> prev_time <span class="kw">by</span> src_ip
+| <span class="kw">eval</span> delta=_time - prev_time
+
+<span class="cm"># Running sum of bytes (cumulative exfil tracking)</span>
+| <span class="fn">sort</span> 0 _time
+| <span class="fn">streamstats</span> <span class="fn">sum</span>(bytes_out) <span class="kw">as</span> cumulative_exfil <span class="kw">by</span> src_ip
+| <span class="kw">where</span> cumulative_exfil &gt; 1073741824</code></pre>
+
+<h3>Comparison of stats commands</h3>
+<table>
+<thead><tr><th>Command</th><th>Collapses rows?</th><th>Use case</th></tr></thead>
+<tbody>
+<tr><td><code>stats</code></td><td>Yes &mdash; one row per group</td><td>Final aggregation, top-N analysis</td></tr>
+<tr><td><code>eventstats</code></td><td>No &mdash; enriches each event</td><td>Add context while keeping raw events</td></tr>
+<tr><td><code>streamstats</code></td><td>No &mdash; rolling calculation</td><td>Time windows, sequence numbering, deltas</td></tr>
+</tbody>
+</table>
+
+<!-- ============================================================ -->
+<!-- SECTION 4 -->
+<!-- ============================================================ -->
+<h2 id="s4"><span class="num">4.</span> IP Address Operations</h2>
+
+<h3>CIDR Matching &amp; Segregation</h3>
+<pre><code><span class="cm"># Match against CIDR blocks</span>
+| <span class="kw">where</span> <span class="fn">cidrmatch</span>(<span class="str">"10.0.0.0/8"</span>, src_ip)
+| <span class="kw">where</span> <span class="fn">cidrmatch</span>(<span class="str">"172.16.0.0/12"</span>, src_ip) OR <span class="fn">cidrmatch</span>(<span class="str">"192.168.0.0/16"</span>, src_ip)
+
+<span class="cm"># Classify traffic: Internal vs External vs Multicast vs Loopback</span>
+| <span class="kw">eval</span> src_zone=<span class="fn">case</span>(
+    <span class="fn">cidrmatch</span>(<span class="str">"10.0.0.0/8"</span>, src_ip),       <span class="str">"RFC1918_ClassA"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"172.16.0.0/12"</span>, src_ip),     <span class="str">"RFC1918_ClassB"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"192.168.0.0/16"</span>, src_ip),    <span class="str">"RFC1918_ClassC"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"169.254.0.0/16"</span>, src_ip),    <span class="str">"LinkLocal"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"127.0.0.0/8"</span>, src_ip),       <span class="str">"Loopback"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"224.0.0.0/4"</span>, src_ip),       <span class="str">"Multicast"</span>,
+    <span class="fn">cidrmatch</span>(<span class="str">"100.64.0.0/10"</span>, src_ip),     <span class="str">"CGNAT"</span>,
+    1==1,                                    <span class="str">"External"</span>
+)
+
+<span class="cm"># Subnet extraction</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=src_ip <span class="str">"^(?&lt;src_subnet&gt;\d+\.\d+\.\d+)\.\d+"</span>
+| <span class="fn">stats</span> <span class="fn">dc</span>(src_ip) <span class="kw">as</span> host_count, <span class="fn">values</span>(src_ip) <span class="kw">as</span> hosts <span class="kw">by</span> src_subnet
+
+<span class="cm"># /16 subnet grouping (useful for large network mapping)</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=src_ip <span class="str">"^(?&lt;src_class_b&gt;\d+\.\d+)\.\d+\.\d+"</span>
+| <span class="fn">stats</span> <span class="fn">dc</span>(src_ip) <span class="kw">as</span> unique_hosts <span class="kw">by</span> src_class_b</code></pre>
+
+<h3>Geolocation</h3>
+<pre><code>| <span class="fn">iplocation</span> src_ip
+| <span class="kw">table</span> src_ip, City, Country, Region, lat, lon
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> Country
+| <span class="fn">sort</span> -count
+
+<span class="cm"># Filter external traffic by geography</span>
+| <span class="fn">iplocation</span> src_ip
+| <span class="kw">where</span> Country!=<span class="str">"United States"</span>
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">dc</span>(src_ip) <span class="kw">as</span> unique_ips, <span class="fn">values</span>(Country) <span class="kw">as</span> countries <span class="kw">by</span> dest_ip</code></pre>
+
+<h3>IPv6</h3>
+<pre><code>| <span class="kw">where</span> <span class="fn">match</span>(src_ip, <span class="str">"^[0-9a-fA-F:]+$"</span>)          <span class="cm"># quick IPv6 filter</span>
+| <span class="fn">regex</span> src_ip=<span class="str">"(?i)^[a-f0-9:]+$"</span>                   <span class="cm"># alternative</span></code></pre>
+
+<h3>Whois / ASN Enrichment (with lookup)</h3>
+<pre><code><span class="cm"># If you have a lookup table for ASN data</span>
+| <span class="fn">lookup</span> asn_lookup ip <span class="kw">as</span> src_ip <span class="kw">OUTPUT</span> asn, org
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> org, asn
+| <span class="fn">sort</span> -count</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 5 -->
+<!-- ============================================================ -->
+<h2 id="s5"><span class="num">5.</span> Correlation &amp; Joining</h2>
+
+<h3>Subsearch (most common correlation pattern)</h3>
+<pre><code><span class="cm"># Find all activity from IPs that had a failed login</span>
+<span class="kw">index</span>=auth action=failure
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip
+| <span class="kw">where</span> count &gt; 5
+| <span class="kw">fields</span> src_ip
+| <span class="fn">map</span> <span class="kw">search</span>=<span class="str">"search index=* src_ip=$src_ip$ earliest=-1h"</span>
+
+<span class="cm"># Better approach — subsearch with IN</span>
+<span class="kw">index</span>=proxy
+    [ <span class="kw">search</span> <span class="kw">index</span>=auth action=failure earliest=-1h
+      | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip
+      | <span class="kw">where</span> count &gt; 5
+      | <span class="kw">fields</span> src_ip ]
+
+<span class="cm"># Subsearch returning values for field comparison</span>
+<span class="kw">index</span>=firewall action=blocked
+    [<span class="kw">search</span> <span class="kw">index</span>=ids severity=critical
+     | <span class="fn">dedup</span> src_ip
+     | <span class="kw">fields</span> src_ip
+     | <span class="fn">rename</span> src_ip <span class="kw">as</span> dest_ip]</code></pre>
+
+<h3>join &mdash; SQL-style joins</h3>
+<pre><code><span class="cm"># Inner join (default) — only matching events survive</span>
+<span class="kw">index</span>=auth action=success
+| <span class="fn">join</span> <span class="kw">type</span>=inner src_ip
+    [ <span class="kw">search</span> <span class="kw">index</span>=proxy category=malware | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip ]
+| <span class="kw">table</span> _time, user, src_ip, count
+
+<span class="cm"># Left join — keep all from main, enrich where match exists</span>
+<span class="kw">index</span>=auth
+| <span class="fn">join</span> <span class="kw">type</span>=left user
+    [ <span class="kw">search</span> <span class="kw">index</span>=hr_data | <span class="kw">table</span> user, department, manager ]
+
+<span class="cm"># Outer join</span>
+<span class="kw">index</span>=firewall
+| <span class="fn">join</span> <span class="kw">type</span>=outer src_ip
+    [ <span class="kw">search</span> <span class="kw">index</span>=threat_intel | <span class="kw">table</span> src_ip, threat_category, confidence ]</code></pre>
+
+<div class="callout">
+  <strong>Warning:</strong> <code>join</code> is limited to 50,000 results on subsearch side by default. For large datasets, use <code>lookup</code> or <code>stats</code>-based correlation.
+</div>
+
+<h3>Transaction &mdash; Group Related Events</h3>
+<pre><code><span class="cm"># Group login → activity → logout by session</span>
+<span class="kw">index</span>=auth
+| <span class="fn">transaction</span> user <span class="kw">startswith</span>=<span class="str">"action=login"</span> <span class="kw">endswith</span>=<span class="str">"action=logout"</span> <span class="kw">maxspan</span>=8h
+| <span class="kw">table</span> user, duration, eventcount, _time
+
+<span class="cm"># Track lateral movement — same user, multiple hosts</span>
+<span class="kw">index</span>=auth action=success
+| <span class="fn">transaction</span> user <span class="kw">maxspan</span>=1h <span class="kw">maxpause</span>=10m
+| <span class="kw">where</span> eventcount &gt; 3 AND <span class="fn">mvcount</span>(host) &gt; 3
+| <span class="kw">table</span> user, host, duration, eventcount
+
+<span class="cm"># DNS request → Firewall block correlation</span>
+<span class="kw">index</span>=dns OR <span class="kw">index</span>=firewall
+| <span class="fn">transaction</span> src_ip <span class="kw">maxspan</span>=5s
+| <span class="kw">search</span> sourcetype=dns AND sourcetype=firewall_block</code></pre>
+
+<h3>Lookup-Based Enrichment (Fastest Correlation)</h3>
+<pre><code><span class="cm"># CSV lookup (threat intel, asset inventory, user directory)</span>
+| <span class="fn">lookup</span> threat_intel_ioc.csv indicator <span class="kw">as</span> dest_ip <span class="kw">OUTPUT</span> threat_name, confidence, source
+| <span class="kw">where</span> <span class="fn">isnotnull</span>(threat_name)
+
+<span class="cm"># Output to lookup (build a dynamic watchlist)</span>
+<span class="kw">index</span>=ids severity=critical
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">values</span>(signature) <span class="kw">as</span> sigs <span class="kw">by</span> src_ip
+| <span class="fn">outputlookup</span> hot_sources.csv
+
+<span class="cm"># inputlookup — use lookup as the primary search source</span>
+| <span class="fn">inputlookup</span> asset_inventory.csv
+| <span class="kw">where</span> subnet=<span class="str">"10.50.0.0/24"</span>
+| <span class="fn">join</span> <span class="kw">type</span>=left ip [ <span class="kw">search</span> <span class="kw">index</span>=vuln_scan | <span class="fn">stats</span> <span class="fn">max</span>(cvss) <span class="kw">as</span> max_cvss <span class="kw">by</span> ip ]</code></pre>
+
+<h3>append / appendcols &mdash; Stack or Column-merge</h3>
+<pre><code><span class="cm"># Vertical stack — combine two independent searches</span>
+<span class="kw">index</span>=windows EventCode=4625 | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">as</span> failed_logins <span class="kw">by</span> src_ip
+| <span class="fn">append</span>
+    [ <span class="kw">search</span> <span class="kw">index</span>=windows EventCode=4624 | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">as</span> success_logins <span class="kw">by</span> src_ip ]
+| <span class="fn">stats</span> <span class="fn">values</span>(failed_logins) <span class="kw">as</span> failed, <span class="fn">values</span>(success_logins) <span class="kw">as</span> success <span class="kw">by</span> src_ip
+
+<span class="cm"># appendcols — add columns from another search</span>
+<span class="kw">index</span>=firewall | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">as</span> fw_events <span class="kw">by</span> _time <span class="kw">span</span>=1h
+| <span class="fn">appendcols</span>
+    [ <span class="kw">search</span> <span class="kw">index</span>=proxy | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">as</span> proxy_events <span class="kw">by</span> _time <span class="kw">span</span>=1h ]</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 6 -->
+<!-- ============================================================ -->
+<h2 id="s6"><span class="num">6.</span> Time-Based Analysis &amp; Graphing</h2>
+
+<h3>timechart &mdash; Time-Series Visualization</h3>
+<pre><code><span class="cm"># Events over time by sourcetype</span>
+| <span class="fn">timechart</span> <span class="kw">span</span>=1h <span class="fn">count</span> <span class="kw">by</span> sourcetype
+
+<span class="cm"># Failed logins per hour by user (limit series)</span>
+<span class="kw">index</span>=auth action=failure
+| <span class="fn">timechart</span> <span class="kw">span</span>=1h <span class="fn">count</span> <span class="kw">by</span> user <span class="kw">limit</span>=10 <span class="kw">useother</span>=f
+
+<span class="cm"># Bytes transferred over time with percentile overlay</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">timechart</span> <span class="kw">span</span>=15m <span class="fn">avg</span>(bytes) <span class="kw">as</span> avg_bytes, <span class="fn">p95</span>(bytes) <span class="kw">as</span> p95_bytes <span class="kw">by</span> action
+
+<span class="cm"># Multiple aggregations — overlay on one chart</span>
+<span class="kw">index</span>=firewall
+| <span class="fn">timechart</span> <span class="kw">span</span>=5m <span class="fn">count</span>(<span class="kw">eval</span>(action=<span class="str">"allowed"</span>)) <span class="kw">as</span> allowed,
+                     <span class="fn">count</span>(<span class="kw">eval</span>(action=<span class="str">"blocked"</span>)) <span class="kw">as</span> blocked
+
+<span class="cm"># Sparkline — inline mini-chart within stats output</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">sparkline</span>(<span class="fn">count</span>, 1h) <span class="kw">as</span> trend, <span class="fn">dc</span>(dest_ip) <span class="kw">as</span> targets <span class="kw">by</span> src_ip
+| <span class="fn">sort</span> -count</code></pre>
+
+<h3>chart &mdash; Arbitrary X-Axis</h3>
+<pre><code><span class="cm"># Heatmap: src_ip vs dest_port</span>
+<span class="kw">index</span>=firewall action=blocked
+| <span class="fn">chart</span> <span class="fn">count</span> <span class="kw">over</span> src_ip <span class="kw">by</span> dest_port <span class="kw">limit</span>=20
+
+<span class="cm"># Error rates by HTTP status and host</span>
+<span class="kw">index</span>=web
+| <span class="fn">chart</span> <span class="fn">count</span> <span class="kw">over</span> host <span class="kw">by</span> status <span class="kw">useother</span>=f <span class="kw">usenull</span>=f
+
+<span class="cm"># Top users per department</span>
+| <span class="fn">chart</span> <span class="fn">dc</span>(user) <span class="kw">over</span> department <span class="kw">by</span> role</code></pre>
+
+<h3>Trendline / Predict</h3>
+<pre><code><span class="cm"># Simple Moving Average (SMA)</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">timechart</span> <span class="kw">span</span>=1h <span class="fn">count</span>
+| <span class="fn">trendline</span> sma5(count) <span class="kw">as</span> moving_avg
+
+<span class="cm"># Weighted Moving Average</span>
+| <span class="fn">trendline</span> wma10(count) <span class="kw">as</span> weighted_avg
+
+<span class="cm"># Exponential Moving Average</span>
+| <span class="fn">trendline</span> ema20(count) <span class="kw">as</span> exp_avg
+
+<span class="cm"># Predictive analytics</span>
+<span class="kw">index</span>=firewall
+| <span class="fn">timechart</span> <span class="kw">span</span>=1h <span class="fn">count</span> <span class="kw">as</span> events
+| <span class="fn">predict</span> events <span class="kw">as</span> predicted_events <span class="kw">algorithm</span>=LLP5 <span class="kw">future_timespan</span>=24
+<span class="cm"># Shows expected vs actual — deviations = anomalies</span></code></pre>
+
+<h3>Bucket (bin) &mdash; Custom Time Grouping</h3>
+<pre><code><span class="cm"># Group _time into buckets</span>
+| <span class="fn">bin</span> _time <span class="kw">span</span>=1h
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> _time, src_ip
+
+<span class="cm"># Custom numeric bins</span>
+| <span class="fn">bin</span> bytes <span class="kw">span</span>=1000 <span class="kw">as</span> byte_bucket
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> byte_bucket
+
+<span class="cm"># Day-of-week analysis</span>
+| <span class="kw">eval</span> dow=<span class="fn">strftime</span>(_time, <span class="str">"%A"</span>)
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> dow
+| <span class="fn">sort</span> count</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 7 -->
+<!-- ============================================================ -->
+<h2 id="s7"><span class="num">7.</span> Eval &mdash; Field Manipulation Swiss Army Knife</h2>
+
+<h3>String Functions</h3>
+<pre><code>| <span class="kw">eval</span> user=<span class="fn">lower</span>(user)
+| <span class="kw">eval</span> domain=<span class="fn">upper</span>(domain)
+| <span class="kw">eval</span> short_url=<span class="fn">substr</span>(url, 1, 80)
+| <span class="kw">eval</span> domain=<span class="fn">mvindex</span>(<span class="fn">split</span>(email, <span class="str">"@"</span>), 1)
+| <span class="kw">eval</span> filename=<span class="fn">replace</span>(filepath, <span class="str">".*\\\\"</span>, <span class="str">""</span>)          <span class="cm"># strip path</span>
+| <span class="kw">eval</span> url_len=<span class="fn">len</span>(url)
+| <span class="kw">eval</span> encoded=<span class="fn">urldecode</span>(raw_url)
+| <span class="kw">eval</span> padded=<span class="fn">printf</span>(<span class="str">"%05d"</span>, event_id)                    <span class="cm"># zero-pad</span>
+| <span class="kw">eval</span> has_admin=<span class="fn">if</span>(<span class="fn">like</span>(user, <span class="str">"%admin%"</span>), <span class="str">"yes"</span>, <span class="str">"no"</span>)
+| <span class="kw">eval</span> user_domain=user . <span class="str">"@"</span> . domain                    <span class="cm"># concatenation</span></code></pre>
+
+<h3>Numeric / Math</h3>
+<pre><code>| <span class="kw">eval</span> mb=<span class="fn">round</span>(bytes/1048576, 2)
+| <span class="kw">eval</span> gb=<span class="fn">round</span>(bytes/1073741824, 3)
+| <span class="kw">eval</span> pct=<span class="fn">round</span>((failures/total)*100, 1)
+| <span class="kw">eval</span> log_val=<span class="fn">log</span>(bytes, 10)
+| <span class="kw">eval</span> abs_diff=<span class="fn">abs</span>(expected - actual)</code></pre>
+
+<h3>Time Functions</h3>
+<pre><code>| <span class="kw">eval</span> event_hour=<span class="fn">strftime</span>(_time, <span class="str">"%H"</span>)
+| <span class="kw">eval</span> event_day=<span class="fn">strftime</span>(_time, <span class="str">"%Y-%m-%d"</span>)
+| <span class="kw">eval</span> dow=<span class="fn">strftime</span>(_time, <span class="str">"%A"</span>)                          <span class="cm"># Monday, Tuesday...</span>
+| <span class="kw">eval</span> epoch_now=<span class="fn">now</span>()
+| <span class="kw">eval</span> hours_ago=<span class="fn">round</span>((<span class="fn">now</span>()-_time)/3600, 2)
+| <span class="kw">eval</span> days_since=<span class="fn">floor</span>((<span class="fn">now</span>()-_time)/86400)
+| <span class="kw">eval</span> _time=<span class="fn">strptime</span>(timestamp, <span class="str">"%Y-%m-%dT%H:%M:%S"</span>)    <span class="cm"># parse string → epoch</span>
+
+<span class="cm"># Business hours check</span>
+| <span class="kw">eval</span> is_business_hours=<span class="fn">if</span>(
+    <span class="fn">tonumber</span>(<span class="fn">strftime</span>(_time, <span class="str">"%H"</span>)) &gt;= 8
+    AND <span class="fn">tonumber</span>(<span class="fn">strftime</span>(_time, <span class="str">"%H"</span>)) &lt; 18
+    AND NOT <span class="fn">match</span>(<span class="fn">strftime</span>(_time, <span class="str">"%A"</span>), <span class="str">"Saturday|Sunday"</span>),
+    <span class="str">"yes"</span>, <span class="str">"no"</span>)</code></pre>
+
+<h3>Conditional Logic</h3>
+<pre><code>| <span class="kw">eval</span> severity=<span class="fn">case</span>(
+    count&gt;=100, <span class="str">"critical"</span>,
+    count&gt;=50,  <span class="str">"high"</span>,
+    count&gt;=10,  <span class="str">"medium"</span>,
+    1==1,       <span class="str">"low"</span>
+)
+
+| <span class="kw">eval</span> alert=<span class="fn">if</span>(count &gt; threshold, <span class="str">"FIRE"</span>, <span class="str">"OK"</span>)
+
+<span class="cm"># coalesce — first non-null</span>
+| <span class="kw">eval</span> user=<span class="fn">coalesce</span>(sAMAccountName, uid, email, <span class="str">"UNKNOWN"</span>)
+
+<span class="cm"># null handling</span>
+| <span class="kw">eval</span> has_user=<span class="fn">if</span>(<span class="fn">isnotnull</span>(user) AND user!=<span class="str">"-"</span>, 1, 0)
+
+<span class="cm"># Validate IP format</span>
+| <span class="kw">eval</span> is_valid_ip=<span class="fn">if</span>(<span class="fn">match</span>(src_ip, <span class="str">"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"</span>), 1, 0)</code></pre>
+
+<h3>Multivalue Functions</h3>
+<pre><code>| <span class="kw">eval</span> ports=<span class="fn">split</span>(dest_ports, <span class="str">","</span>)
+| <span class="kw">eval</span> port_count=<span class="fn">mvcount</span>(ports)
+| <span class="kw">eval</span> first_port=<span class="fn">mvindex</span>(ports, 0)
+| <span class="kw">eval</span> last_port=<span class="fn">mvindex</span>(ports, -1)
+| <span class="kw">eval</span> has_443=<span class="fn">if</span>(<span class="fn">mvfind</span>(ports, <span class="str">"^443$"</span>) &gt;= 0, 1, 0)
+| <span class="kw">eval</span> filtered=<span class="fn">mvfilter</span>(<span class="fn">match</span>(ports, <span class="str">"^(80|443)$"</span>))
+| <span class="kw">eval</span> sorted_ports=<span class="fn">mvsort</span>(ports)
+| <span class="kw">eval</span> deduped=<span class="fn">mvdedup</span>(ports)
+| <span class="kw">eval</span> combined=<span class="fn">mvappend</span>(src_ports, dest_ports)
+| <span class="kw">eval</span> csv_ports=<span class="fn">mvjoin</span>(ports, <span class="str">","</span>)
+
+<span class="cm"># mvexpand — explode multivalue into separate events</span>
+| <span class="kw">eval</span> ports=<span class="fn">split</span>(<span class="str">"80,443,8080"</span>, <span class="str">","</span>)
+| <span class="fn">mvexpand</span> ports</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 8 -->
+<!-- ============================================================ -->
+<h2 id="s8"><span class="num">8.</span> Threat Hunting Query Cookbook</h2>
+
+<div class="hunt-card">
+  <h4>8.1 &mdash; Brute Force Detection</h4>
+  <span class="tag mitre">MITRE T1110</span>
+  <span class="tag ds">Windows Security</span>
+<pre><code><span class="kw">index</span>=windows <span class="kw">sourcetype</span>=WinEventLog:Security EventCode=4625
+| <span class="fn">bin</span> _time <span class="kw">span</span>=10m
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">dc</span>(TargetUserName) <span class="kw">as</span> targeted_users,
+        <span class="fn">values</span>(TargetUserName) <span class="kw">as</span> users,
+        <span class="fn">dc</span>(IpAddress) <span class="kw">as</span> source_ips
+    <span class="kw">by</span> IpAddress, _time
+| <span class="kw">where</span> count &gt; 20 OR targeted_users &gt; 5
+| <span class="fn">sort</span> -count</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.2 &mdash; Password Spray (Many Users, Few Attempts Each)</h4>
+  <span class="tag mitre">MITRE T1110.003</span>
+  <span class="tag ds">Windows Security</span>
+<pre><code><span class="kw">index</span>=windows EventCode=4625
+| <span class="fn">bin</span> _time <span class="kw">span</span>=30m
+| <span class="fn">stats</span> <span class="fn">dc</span>(TargetUserName) <span class="kw">as</span> unique_users,
+        <span class="fn">count</span> <span class="kw">as</span> total_attempts,
+        <span class="fn">values</span>(TargetUserName) <span class="kw">as</span> targets
+    <span class="kw">by</span> IpAddress, _time
+| <span class="kw">where</span> unique_users &gt; 10 AND (total_attempts/unique_users) &lt; 3
+| <span class="fn">sort</span> -unique_users</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.3 &mdash; Lateral Movement (Pass-the-Hash/Ticket)</h4>
+  <span class="tag mitre">MITRE T1550</span>
+  <span class="tag ds">Windows Security</span>
+<pre><code><span class="kw">index</span>=windows EventCode=4624 Logon_Type=3
+| <span class="fn">stats</span> <span class="fn">dc</span>(host) <span class="kw">as</span> host_count,
+        <span class="fn">values</span>(host) <span class="kw">as</span> hosts,
+        <span class="fn">earliest</span>(_time) <span class="kw">as</span> first_seen,
+        <span class="fn">latest</span>(_time) <span class="kw">as</span> last_seen
+    <span class="kw">by</span> Account_Name, Source_Network_Address
+| <span class="kw">where</span> host_count &gt; 3
+| <span class="kw">eval</span> duration_min=<span class="fn">round</span>((last_seen - first_seen)/60, 2)
+| <span class="fn">sort</span> -host_count</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.4 &mdash; DNS Exfiltration / Tunneling</h4>
+  <span class="tag mitre">MITRE T1071.004</span>
+  <span class="tag ds">DNS</span>
+<pre><code><span class="kw">index</span>=dns
+| <span class="kw">eval</span> query_len=<span class="fn">len</span>(query)
+| <span class="kw">eval</span> subdomain_count=<span class="fn">mvcount</span>(<span class="fn">split</span>(query, <span class="str">"."</span>))
+| <span class="kw">eval</span> has_encoded=<span class="fn">if</span>(<span class="fn">match</span>(query, <span class="str">"[0-9a-f]{16,}|[A-Za-z0-9+/]{20,}"</span>), 1, 0)
+| <span class="fn">stats</span> <span class="fn">avg</span>(query_len) <span class="kw">as</span> avg_len,
+        <span class="fn">max</span>(query_len) <span class="kw">as</span> max_len,
+        <span class="fn">count</span> <span class="kw">as</span> query_count,
+        <span class="fn">dc</span>(query) <span class="kw">as</span> unique_queries,
+        <span class="fn">sum</span>(has_encoded) <span class="kw">as</span> encoded_count
+    <span class="kw">by</span> src_ip, query_type
+| <span class="kw">where</span> (avg_len &gt; 40 AND query_count &gt; 100)
+        OR (unique_queries/query_count &gt; 0.9)
+        OR encoded_count &gt; 10
+| <span class="fn">sort</span> -avg_len</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.5 &mdash; Beaconing Detection (C2 Callback)</h4>
+  <span class="tag mitre">MITRE T1071</span>
+  <span class="tag ds">Proxy / Firewall</span>
+  <p style="color: var(--accent2); font-size: 0.85rem; margin-bottom: 10px;"><strong>Jitter &lt; 25% = highly periodic = likely C2.</strong></p>
+<pre><code><span class="kw">index</span>=proxy OR <span class="kw">index</span>=firewall
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">dc</span>(dest_ip) <span class="kw">as</span> dest_count, <span class="fn">values</span>(dest_port) <span class="kw">as</span> ports
+    <span class="kw">by</span> src_ip, dest_ip
+| <span class="kw">where</span> count &gt; 50
+| <span class="fn">join</span> <span class="kw">type</span>=inner src_ip dest_ip
+    [<span class="kw">search</span> <span class="kw">index</span>=proxy OR <span class="kw">index</span>=firewall
+     | <span class="fn">sort</span> 0 _time
+     | <span class="fn">streamstats</span> <span class="kw">current</span>=f <span class="fn">last</span>(_time) <span class="kw">as</span> prev_time <span class="kw">by</span> src_ip, dest_ip
+     | <span class="kw">eval</span> delta=_time - prev_time
+     | <span class="kw">where</span> <span class="fn">isnotnull</span>(delta)
+     | <span class="fn">stats</span> <span class="fn">stdev</span>(delta) <span class="kw">as</span> jitter,
+             <span class="fn">avg</span>(delta) <span class="kw">as</span> avg_interval,
+             <span class="fn">count</span> <span class="kw">as</span> beacon_count
+         <span class="kw">by</span> src_ip, dest_ip
+     | <span class="kw">where</span> beacon_count &gt; 20
+     | <span class="kw">eval</span> jitter_pct=<span class="fn">round</span>((jitter/avg_interval)*100, 2)
+     | <span class="kw">where</span> jitter_pct &lt; 25]
+| <span class="kw">table</span> src_ip, dest_ip, count, avg_interval, jitter_pct, ports
+| <span class="fn">sort</span> jitter_pct</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.6 &mdash; Data Exfiltration (Anomalous Upload Volume)</h4>
+  <span class="tag mitre">MITRE T1048</span>
+  <span class="tag ds">Proxy</span>
+<pre><code><span class="kw">index</span>=proxy
+| <span class="kw">eval</span> mb_out=bytes_out/1048576
+| <span class="fn">stats</span> <span class="fn">sum</span>(mb_out) <span class="kw">as</span> total_mb,
+        <span class="fn">dc</span>(dest_ip) <span class="kw">as</span> unique_dests,
+        <span class="fn">values</span>(dest_ip) <span class="kw">as</span> destinations
+    <span class="kw">by</span> src_ip
+| <span class="fn">eventstats</span> <span class="fn">avg</span>(total_mb) <span class="kw">as</span> global_avg, <span class="fn">stdev</span>(total_mb) <span class="kw">as</span> global_stdev
+| <span class="kw">eval</span> zscore=<span class="fn">round</span>((total_mb - global_avg)/global_stdev, 2)
+| <span class="kw">where</span> zscore &gt; 3
+| <span class="fn">sort</span> -zscore
+| <span class="kw">table</span> src_ip, total_mb, zscore, unique_dests, destinations</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.7 &mdash; Living Off the Land (LOLBins)</h4>
+  <span class="tag mitre">MITRE T1218</span>
+  <span class="tag ds">Sysmon EventCode=1</span>
+<pre><code><span class="kw">index</span>=windows <span class="kw">sourcetype</span>=Sysmon EventCode=1
+| <span class="kw">where</span> <span class="fn">match</span>(Image, <span class="str">"(?i)(certutil|bitsadmin|mshta|regsvr32|rundll32|wmic|msiexec|cmstp|cscript|wscript|powershell|cmd)\.exe$"</span>)
+| <span class="kw">eval</span> suspicious_args=<span class="fn">case</span>(
+    <span class="fn">match</span>(CommandLine, <span class="str">"(?i)(http|ftp|\\\\\\\\|base64|-enc|-decode|downloadstring|invoke-expression|iex|bypass|hidden|-nop)"</span>), 1,
+    1==1, 0)
+| <span class="kw">where</span> suspicious_args=1
+| <span class="fn">stats</span> <span class="fn">count</span>,
+        <span class="fn">values</span>(CommandLine) <span class="kw">as</span> cmds,
+        <span class="fn">values</span>(ParentImage) <span class="kw">as</span> parents,
+        <span class="fn">dc</span>(host) <span class="kw">as</span> host_count
+    <span class="kw">by</span> Image, User
+| <span class="fn">sort</span> -count</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.8 &mdash; Impossible Travel (Geo-Based)</h4>
+  <span class="tag mitre">MITRE T1078</span>
+  <span class="tag ds">Authentication</span>
+<pre><code><span class="kw">index</span>=auth action=success
+| <span class="fn">iplocation</span> src_ip
+| <span class="fn">sort</span> 0 user, _time
+| <span class="fn">streamstats</span> <span class="kw">current</span>=f <span class="fn">last</span>(lat) <span class="kw">as</span> prev_lat,
+                        <span class="fn">last</span>(lon) <span class="kw">as</span> prev_lon,
+                        <span class="fn">last</span>(_time) <span class="kw">as</span> prev_time,
+                        <span class="fn">last</span>(City) <span class="kw">as</span> prev_city,
+                        <span class="fn">last</span>(Country) <span class="kw">as</span> prev_country
+              <span class="kw">by</span> user
+| <span class="kw">where</span> <span class="fn">isnotnull</span>(prev_lat)
+| <span class="kw">eval</span> distance_km=<span class="fn">round</span>(3959*<span class="fn">acos</span>(
+    <span class="fn">sin</span>(lat*<span class="fn">pi</span>()/180)*<span class="fn">sin</span>(prev_lat*<span class="fn">pi</span>()/180) +
+    <span class="fn">cos</span>(lat*<span class="fn">pi</span>()/180)*<span class="fn">cos</span>(prev_lat*<span class="fn">pi</span>()/180)*
+    <span class="fn">cos</span>((prev_lon-lon)*<span class="fn">pi</span>()/180)
+  )*1.60934, 0)
+| <span class="kw">eval</span> time_diff_hrs=<span class="fn">round</span>((_time - prev_time)/3600, 2)
+| <span class="kw">eval</span> speed_kmh=<span class="fn">if</span>(time_diff_hrs&gt;0, <span class="fn">round</span>(distance_km/time_diff_hrs, 0), 0)
+| <span class="kw">where</span> speed_kmh &gt; 800 AND distance_km &gt; 500
+| <span class="kw">table</span> _time, user, prev_city, prev_country, City, Country, distance_km, time_diff_hrs, speed_kmh
+| <span class="fn">sort</span> -speed_kmh</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.9 &mdash; First-Time Seen (New Entity Detection)</h4>
+  <span class="tag mitre">MITRE T1078</span>
+  <span class="tag ds">Any</span>
+<pre><code><span class="cm"># New src_ip never seen before in last 30 days</span>
+<span class="kw">index</span>=proxy earliest=-1d latest=now
+| <span class="fn">stats</span> <span class="fn">earliest</span>(_time) <span class="kw">as</span> first_today <span class="kw">by</span> src_ip
+| <span class="fn">join</span> <span class="kw">type</span>=left src_ip
+    [<span class="kw">search</span> <span class="kw">index</span>=proxy earliest=-31d latest=-1d
+     | <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip
+     | <span class="fn">rename</span> count <span class="kw">as</span> historical_count]
+| <span class="kw">where</span> <span class="fn">isnull</span>(historical_count)
+| <span class="kw">table</span> src_ip, first_today
+| <span class="kw">eval</span> first_today=<span class="fn">strftime</span>(first_today, <span class="str">"%Y-%m-%d %H:%M:%S"</span>)
+| <span class="fn">sort</span> first_today</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.10 &mdash; Process Injection (Sysmon)</h4>
+  <span class="tag mitre">MITRE T1055</span>
+  <span class="tag ds">Sysmon</span>
+<pre><code><span class="cm"># Sysmon EventCode=8 (CreateRemoteThread)</span>
+<span class="kw">index</span>=windows <span class="kw">sourcetype</span>=Sysmon EventCode=8
+| <span class="kw">where</span> SourceImage!=TargetImage
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">values</span>(TargetImage) <span class="kw">as</span> targets <span class="kw">by</span> SourceImage, SourceUser
+| <span class="kw">where</span> NOT <span class="fn">match</span>(SourceImage, <span class="str">"(?i)(csrss|lsass|svchost|services)\.exe$"</span>)
+| <span class="fn">sort</span> -count
+
+<span class="cm"># Sysmon EventCode=10 (Process Access with PROCESS_VM_WRITE)</span>
+<span class="kw">index</span>=windows <span class="kw">sourcetype</span>=Sysmon EventCode=10
+| <span class="kw">where</span> GrantedAccess=<span class="str">"0x1F0FFF"</span> OR GrantedAccess=<span class="str">"0x1FFFFF"</span> OR <span class="fn">match</span>(GrantedAccess, <span class="str">"0x0020|0x0008"</span>)
+| <span class="kw">where</span> SourceImage!=TargetImage
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> SourceImage, TargetImage, GrantedAccess
+| <span class="fn">sort</span> -count</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.11 &mdash; Scheduled Task / Persistence</h4>
+  <span class="tag mitre">MITRE T1053.005</span>
+  <span class="tag ds">Windows Security</span>
+<pre><code><span class="cm"># Windows Event 4698 — Task Created</span>
+<span class="kw">index</span>=windows EventCode=4698
+| <span class="fn">rex</span> <span class="kw">field</span>=Task_Content <span class="str">"&lt;Command&gt;(?&lt;task_cmd&gt;[^&lt;]+)&lt;/Command&gt;"</span>
+| <span class="fn">rex</span> <span class="kw">field</span>=Task_Content <span class="str">"&lt;Arguments&gt;(?&lt;task_args&gt;[^&lt;]+)&lt;/Arguments&gt;"</span>
+| <span class="kw">table</span> _time, host, SubjectUserName, TaskName, task_cmd, task_args
+| <span class="kw">where</span> NOT <span class="fn">match</span>(SubjectUserName, <span class="str">"(?i)SYSTEM"</span>)
+| <span class="fn">sort</span> -_time</code></pre>
+</div>
+
+<div class="hunt-card">
+  <h4>8.12 &mdash; PowerShell Threat Detection</h4>
+  <span class="tag mitre">MITRE T1059.001</span>
+  <span class="tag ds">PowerShell Operational</span>
+<pre><code><span class="kw">index</span>=windows <span class="kw">sourcetype</span>=WinEventLog:Microsoft-Windows-PowerShell/Operational EventCode=4104
+| <span class="fn">stats</span> <span class="fn">values</span>(ScriptBlockText) <span class="kw">as</span> script_blocks, <span class="fn">count</span> <span class="kw">by</span> host, UserID
+| <span class="kw">eval</span> suspicious=<span class="fn">if</span>(<span class="fn">match</span>(<span class="fn">mvjoin</span>(script_blocks, <span class="str">" "</span>),
+    <span class="str">"(?i)(invoke-mimikatz|invoke-shellcode|invoke-obfuscation|net\.webclient|downloadstring|downloadfile|frombase64string|invoke-expression|iex\s*\(|bypass|amsiutils|reflection\.assembly|gettype|invoke-command.*-computername|enter-pssession|new-pssession)"</span>),
+    1, 0)
+| <span class="kw">where</span> suspicious=1
+| <span class="fn">sort</span> -count</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9 -->
+<!-- ============================================================ -->
+<h2 id="s9"><span class="num">9.</span> Formatting &amp; Presentation</h2>
+
+<h3>table, fields, rename</h3>
+<pre><code>| <span class="kw">table</span> _time, src_ip, dest_ip, action, bytes         <span class="cm"># select &amp; order columns</span>
+| <span class="kw">fields</span> - _raw, _cd, _indextime, _serial              <span class="cm"># drop fields</span>
+| <span class="kw">fields</span> + src_ip, dest_ip                             <span class="cm"># keep only these</span>
+| <span class="fn">rename</span> src_ip <span class="kw">as</span> <span class="str">"Source IP"</span>, count <span class="kw">as</span> <span class="str">"Total Events"</span></code></pre>
+
+<h3>sort &amp; head/tail</h3>
+<pre><code>| <span class="fn">sort</span> 0 -count, +src_ip        <span class="cm"># 0 = no limit; desc count, asc src_ip</span>
+| <span class="fn">head</span> 50                        <span class="cm"># first 50</span>
+| <span class="fn">tail</span> 10                        <span class="cm"># last 10</span>
+| <span class="fn">reverse</span>                        <span class="cm"># flip order</span></code></pre>
+
+<h3>dedup</h3>
+<pre><code>| <span class="fn">dedup</span> src_ip dest_ip           <span class="cm"># first event per combo</span>
+| <span class="fn">dedup</span> 3 src_ip                 <span class="cm"># keep first 3 per src_ip</span>
+| <span class="fn">dedup</span> src_ip <span class="kw">sortby</span> -_time     <span class="cm"># keep latest per src_ip</span></code></pre>
+
+<h3>String Formatting for Reports</h3>
+<pre><code>| <span class="kw">eval</span> traffic_fmt=<span class="fn">tostring</span>(bytes, <span class="str">"commas"</span>)           <span class="cm"># 1,234,567</span>
+| <span class="kw">eval</span> duration_fmt=<span class="fn">tostring</span>(duration, <span class="str">"duration"</span>)     <span class="cm"># 02:15:30</span>
+| <span class="kw">eval</span> hex_val=<span class="fn">tostring</span>(decimal_val, <span class="str">"hex"</span>)            <span class="cm"># 0xFF</span></code></pre>
+
+<h3>addtotals / untable / xyseries</h3>
+<pre><code><span class="cm"># Add row totals</span>
+| <span class="fn">addtotals</span> <span class="kw">fieldname</span>=total
+
+<span class="cm"># Pivot long → wide</span>
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> src_ip, action
+| <span class="fn">xyseries</span> src_ip action count
+
+<span class="cm"># Pivot wide → long</span>
+| <span class="fn">untable</span> src_ip action count</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 10 -->
+<!-- ============================================================ -->
+<h2 id="s10"><span class="num">10.</span> Macros, Lookups &amp; Acceleration</h2>
+
+<h3>Defining &amp; Using Macros</h3>
+<pre><code><span class="cm"># Define (via Settings &gt; Advanced Search &gt; Macros or macros.conf)</span>
+<span class="cm"># Name: rfc1918(1)</span>
+<span class="cm"># Definition: cidrmatch("10.0.0.0/8",$ip$) OR cidrmatch("172.16.0.0/12",$ip$) OR cidrmatch("192.168.0.0/16",$ip$)</span>
+
+<span class="cm"># Usage</span>
+| <span class="kw">where</span> <span class="fn">`rfc1918(src_ip)`</span>
+| <span class="kw">eval</span> zone=<span class="fn">if</span>(<span class="fn">`rfc1918(src_ip)`</span>, <span class="str">"internal"</span>, <span class="str">"external"</span>)</code></pre>
+
+<h3>Data Models &amp; tstats (Fastest Queries)</h3>
+<pre><code><span class="cm"># tstats queries accelerated data models — 10-100x faster than raw search</span>
+| <span class="fn">tstats</span> <span class="kw">summariesonly</span>=t <span class="fn">count</span> <span class="kw">from</span> <span class="kw">datamodel</span>=Network_Traffic
+    <span class="kw">where</span> All_Traffic.dest_port=443
+    <span class="kw">by</span> All_Traffic.src_ip, All_Traffic.dest_ip, _time <span class="kw">span</span>=1h
+| <span class="fn">rename</span> All_Traffic.* <span class="kw">as</span> *
+
+| <span class="fn">tstats</span> <span class="kw">summariesonly</span>=t <span class="fn">dc</span>(Authentication.src) <span class="kw">as</span> unique_sources
+    <span class="kw">from</span> <span class="kw">datamodel</span>=Authentication
+    <span class="kw">where</span> Authentication.action=failure
+    <span class="kw">by</span> Authentication.user, _time <span class="kw">span</span>=15m
+| <span class="fn">rename</span> Authentication.* <span class="kw">as</span> *
+| <span class="kw">where</span> unique_sources &gt; 5</code></pre>
+
+<h3>Datamodel Accelerated Threat Hunting</h3>
+<pre><code><span class="cm"># Fastest way to count all network traffic by source</span>
+| <span class="fn">tstats</span> <span class="kw">summariesonly</span>=t <span class="fn">sum</span>(All_Traffic.bytes) <span class="kw">as</span> bytes,
+    <span class="fn">count</span> <span class="kw">as</span> events
+    <span class="kw">from</span> <span class="kw">datamodel</span>=Network_Traffic
+    <span class="kw">by</span> All_Traffic.src_ip, All_Traffic.dest_ip, All_Traffic.dest_port
+    <span class="kw">where</span> earliest=-24h
+| <span class="fn">rename</span> All_Traffic.* <span class="kw">as</span> *
+| <span class="fn">sort</span> -bytes
+
+<span class="cm"># Endpoint process execution (CIM)</span>
+| <span class="fn">tstats</span> <span class="kw">summariesonly</span>=t <span class="fn">count</span> <span class="kw">from</span> <span class="kw">datamodel</span>=Endpoint.Processes
+    <span class="kw">where</span> Processes.process_name=cmd.exe
+    <span class="kw">by</span> Processes.parent_process_name, Processes.dest, Processes.user, _time <span class="kw">span</span>=1h
+| <span class="fn">rename</span> Processes.* <span class="kw">as</span> *</code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 11 -->
+<!-- ============================================================ -->
+<h2 id="s11"><span class="num">11.</span> Advanced Techniques</h2>
+
+<h3>map &mdash; Dynamic Iteration</h3>
+<pre><code><span class="cm"># For each malicious IP, get all their sessions</span>
+<span class="kw">index</span>=ids severity=critical
+| <span class="fn">dedup</span> src_ip
+| <span class="fn">head</span> 20
+| <span class="fn">map</span> <span class="kw">maxsearches</span>=20 <span class="kw">search</span>=<span class="str">"search index=proxy src_ip=$src_ip$ | head 100"</span></code></pre>
+
+<h3>makeresults &mdash; Synthetic Data / Testing</h3>
+<pre><code><span class="cm"># Test eval logic without real data</span>
+| <span class="fn">makeresults</span> <span class="kw">count</span>=1
+| <span class="kw">eval</span> src_ip=<span class="str">"192.168.1.100"</span>
+| <span class="kw">eval</span> zone=<span class="fn">if</span>(<span class="fn">cidrmatch</span>(<span class="str">"192.168.0.0/16"</span>, src_ip), <span class="str">"internal"</span>, <span class="str">"external"</span>)
+
+<span class="cm"># Generate time series skeleton</span>
+| <span class="fn">makeresults</span> <span class="kw">count</span>=24
+| <span class="fn">streamstats</span> <span class="fn">count</span> <span class="kw">as</span> hour
+| <span class="kw">eval</span> _time=<span class="fn">relative_time</span>(<span class="fn">now</span>(), <span class="str">"-"</span> . hour . <span class="str">"h"</span>)</code></pre>
+
+<h3>foreach &mdash; Iterate Over Fields</h3>
+<pre><code>| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> status
+| <span class="fn">xyseries</span> _time status count
+| <span class="fn">foreach</span> 2* 3* 4* 5*
+    [<span class="kw">eval</span> &lt;&lt;FIELD&gt;&gt;=<span class="fn">if</span>(<span class="fn">isnull</span>(&lt;&lt;FIELD&gt;&gt;), 0, &lt;&lt;FIELD&gt;&gt;)]</code></pre>
+
+<h3>REST API Introspection</h3>
+<pre><code><span class="cm"># List all indexes and their sizes</span>
+| <span class="fn">rest</span> /services/data/indexes
+| <span class="kw">table</span> title, totalEventCount, currentDBSizeMB
+| <span class="fn">sort</span> -currentDBSizeMB
+
+<span class="cm"># List saved searches</span>
+| <span class="fn">rest</span> /servicesNS/-/-/saved/searches
+| <span class="kw">table</span> title, search, cron_schedule, disabled
+| <span class="kw">where</span> disabled=0
+
+<span class="cm"># KV Store collections</span>
+| <span class="fn">rest</span> /servicesNS/-/-/storage/collections/config
+| <span class="kw">table</span> title</code></pre>
+
+<h3>Threat Intel Correlation at Scale</h3>
+<pre><code><span class="cm"># IOC sweep across all indexes</span>
+| <span class="fn">inputlookup</span> threat_iocs.csv
+| <span class="fn">rename</span> indicator <span class="kw">as</span> search_term, type <span class="kw">as</span> ioc_type
+| <span class="fn">map</span> <span class="kw">maxsearches</span>=100 <span class="kw">search</span>=<span class="str">"search index=* \"$search_term$\"
+    | eval ioc=\"$search_term$\", ioc_type=\"$ioc_type$\"
+    | head 10"</span>
+| <span class="fn">stats</span> <span class="fn">count</span>, <span class="fn">values</span>(index) <span class="kw">as</span> seen_in, <span class="fn">values</span>(sourcetype) <span class="kw">as</span> sources
+    <span class="kw">by</span> ioc, ioc_type
+| <span class="fn">sort</span> -count</code></pre>
+
+<h3>Anomaly Detection Without ML Toolkit</h3>
+<pre><code><span class="cm"># Z-score based anomaly detection</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">bin</span> _time <span class="kw">span</span>=1h
+| <span class="fn">stats</span> <span class="fn">sum</span>(bytes) <span class="kw">as</span> hourly_bytes <span class="kw">by</span> src_ip, _time
+| <span class="fn">eventstats</span> <span class="fn">avg</span>(hourly_bytes) <span class="kw">as</span> avg_bytes,
+             <span class="fn">stdev</span>(hourly_bytes) <span class="kw">as</span> stdev_bytes
+         <span class="kw">by</span> src_ip
+| <span class="kw">eval</span> zscore=<span class="fn">if</span>(stdev_bytes&gt;0, <span class="fn">round</span>((hourly_bytes - avg_bytes)/stdev_bytes, 2), 0)
+| <span class="kw">where</span> zscore &gt; 3 OR zscore &lt; -3
+| <span class="fn">sort</span> -zscore
+
+<span class="cm"># IQR-based outlier detection</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">stats</span> <span class="fn">sum</span>(bytes) <span class="kw">as</span> total_bytes <span class="kw">by</span> src_ip
+| <span class="fn">eventstats</span> <span class="fn">perc25</span>(total_bytes) <span class="kw">as</span> q1,
+             <span class="fn">perc75</span>(total_bytes) <span class="kw">as</span> q3
+| <span class="kw">eval</span> iqr=q3-q1,
+       upper_fence=q3 + 1.5*iqr,
+       lower_fence=q1 - 1.5*iqr
+| <span class="kw">where</span> total_bytes &gt; upper_fence
+| <span class="fn">sort</span> -total_bytes</code></pre>
+
+<h3>Rare / Frequency Analysis</h3>
+<pre><code><span class="cm"># Find rare processes (appears &lt; 3 times across fleet)</span>
+<span class="kw">index</span>=windows <span class="kw">sourcetype</span>=Sysmon EventCode=1
+| <span class="fn">rare</span> <span class="kw">limit</span>=50 Image <span class="kw">by</span> host
+| <span class="kw">where</span> count &lt; 3
+
+<span class="cm"># Frequency analysis of user-agent strings</span>
+<span class="kw">index</span>=proxy
+| <span class="fn">stats</span> <span class="fn">count</span> <span class="kw">by</span> http_user_agent
+| <span class="fn">eventstats</span> <span class="fn">sum</span>(count) <span class="kw">as</span> total
+| <span class="kw">eval</span> pct=<span class="fn">round</span>((count/total)*100, 4)
+| <span class="kw">where</span> pct &lt; 0.01
+| <span class="fn">sort</span> count
+<span class="cm"># Sub-0.01% user agents = investigate</span></code></pre>
+
+<!-- ============================================================ -->
+<!-- SECTION 12 -->
+<!-- ============================================================ -->
+<h2 id="s12"><span class="num">12.</span> Quick Reference &mdash; Command Cheat Table</h2>
+
+<table>
+<thead><tr><th>Category</th><th>Command</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td rowspan="4"><strong>Filter</strong></td><td><code>where</code></td><td>Expression-based filter (CIDR, regex, math)</td></tr>
+<tr><td><code>search</code></td><td>Keyword/wildcard filter</td></tr>
+<tr><td><code>regex</code></td><td>PCRE filter on field</td></tr>
+<tr><td><code>dedup</code></td><td>Remove duplicate events</td></tr>
+
+<tr><td rowspan="3"><strong>Extract</strong></td><td><code>rex</code></td><td>PCRE field extraction or sed replacement</td></tr>
+<tr><td><code>erex</code></td><td>Example-based extraction (ML)</td></tr>
+<tr><td><code>spath</code></td><td>JSON/XML extraction</td></tr>
+
+<tr><td rowspan="5"><strong>Aggregate</strong></td><td><code>stats</code></td><td>Group + aggregate (collapses rows)</td></tr>
+<tr><td><code>eventstats</code></td><td>Enrich without collapsing</td></tr>
+<tr><td><code>streamstats</code></td><td>Rolling/cumulative calculations</td></tr>
+<tr><td><code>chart</code></td><td>Aggregate with arbitrary X axis</td></tr>
+<tr><td><code>timechart</code></td><td>Aggregate with _time as X axis</td></tr>
+
+<tr><td rowspan="6"><strong>Join</strong></td><td><code>join</code></td><td>SQL-style join (inner/left/outer)</td></tr>
+<tr><td><code>lookup</code></td><td>Enrich from CSV/KV store</td></tr>
+<tr><td><code>append</code></td><td>Vertically stack result sets</td></tr>
+<tr><td><code>appendcols</code></td><td>Horizontally merge result sets</td></tr>
+<tr><td><code>transaction</code></td><td>Group events by session/flow</td></tr>
+<tr><td><code>map</code></td><td>Iterative subsearch</td></tr>
+
+<tr><td rowspan="7"><strong>Transform</strong></td><td><code>eval</code></td><td>Create/modify fields (expressions)</td></tr>
+<tr><td><code>rename</code></td><td>Rename fields</td></tr>
+<tr><td><code>table</code></td><td>Select + order output columns</td></tr>
+<tr><td><code>fields</code></td><td>Keep/remove fields</td></tr>
+<tr><td><code>sort</code></td><td>Order results</td></tr>
+<tr><td><code>bin / bucket</code></td><td>Discretize numeric/time values</td></tr>
+<tr><td><code>mvexpand</code></td><td>Explode multivalue into rows</td></tr>
+
+<tr><td rowspan="4"><strong>Enrich</strong></td><td><code>iplocation</code></td><td>Geo-enrich IP fields</td></tr>
+<tr><td><code>lookup</code></td><td>CSV/KV/External lookup</td></tr>
+<tr><td><code>inputlookup</code></td><td>Use lookup as primary source</td></tr>
+<tr><td><code>outputlookup</code></td><td>Write results to lookup</td></tr>
+
+<tr><td rowspan="5"><strong>Viz</strong></td><td><code>timechart</code></td><td>Time-series chart</td></tr>
+<tr><td><code>chart</code></td><td>Bar/column/pie chart</td></tr>
+<tr><td><code>trendline</code></td><td>SMA/WMA/EMA overlay</td></tr>
+<tr><td><code>predict</code></td><td>Forecast future values</td></tr>
+<tr><td><code>sparkline</code></td><td>Inline mini-chart in table</td></tr>
+
+<tr><td rowspan="2"><strong>Perf</strong></td><td><code>tstats</code></td><td>Query accelerated data models</td></tr>
+<tr><td><code>datamodel</code></td><td>Reference CIM-compliant models</td></tr>
+
+<tr><td rowspan="4"><strong>Utility</strong></td><td><code>makeresults</code></td><td>Generate synthetic events</td></tr>
+<tr><td><code>rest</code></td><td>Query Splunk REST API</td></tr>
+<tr><td><code>collect</code></td><td>Write results to a summary index</td></tr>
+<tr><td><code>sendalert</code></td><td>Trigger an alert action</td></tr>
+</tbody>
+</table>
+
+<!-- ============================================================ -->
+<!-- SECTION 13 -->
+<!-- ============================================================ -->
+<h2 id="s13"><span class="num">13.</span> Performance Optimization Rules</h2>
+
+<div class="hunt-card" style="border-left: 3px solid var(--accent2);">
+<ol style="padding-left: 20px; color: var(--text); line-height: 2.2;">
+  <li><strong>Time first</strong> &mdash; Always specify <code>earliest=</code> / <code>latest=</code> as tight as possible</li>
+  <li><strong>Index + sourcetype in base search</strong> &mdash; Never search <code>index=*</code> in production</li>
+  <li><strong>Filter before transform</strong> &mdash; Push <code>where</code>/<code>search</code> before <code>stats</code>/<code>eval</code></li>
+  <li><strong>Use tstats</strong> over raw search when data model acceleration is available</li>
+  <li><strong>Avoid <code>join</code></strong> when <code>stats</code> + <code>eventstats</code> or <code>lookup</code> can achieve the same</li>
+  <li><strong><code>fields</code> early</strong> &mdash; Drop unnecessary fields before expensive commands</li>
+  <li><strong><code>dedup</code> wisely</strong> &mdash; Use before <code>join</code>/<code>map</code> to reduce input volume</li>
+  <li><strong>Subsearch limits</strong> &mdash; Default 10,000 results, 60 seconds. Use <code>maxresults</code> or switch to <code>lookup</code></li>
+  <li><strong><code>sort 0</code></strong> &mdash; Explicit <code>0</code> removes the default 10,000 row sort limit</li>
+  <li><strong><code>stats</code> &gt; <code>transaction</code></strong> &mdash; <code>transaction</code> is memory-hungry; prefer <code>stats</code> with <code>earliest</code>/<code>latest</code> and <code>values()</code></li>
+</ol>
+</div>
+
+<div style="text-align: center; margin-top: 60px; padding: 30px 0; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;">
+  Splunk SPL &mdash; Threat Hunter's Field Reference &bull; Generated 2026-02-24
+</div>
+
+</div><!-- /container -->
+
+<!-- BACK TO TOP -->
+<a href="#" class="btt" id="btt" title="Back to top">&uarr;</a>
+
+<script>
+// Back to top visibility
+const btt = document.getElementById('btt');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('visible', window.scrollY > 400);
+});
+
+// Copy buttons on all pre blocks
+document.querySelectorAll('pre').forEach(block => {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.addEventListener('click', () => {
+    const code = block.querySelector('code');
+    const text = code ? code.textContent : block.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+  block.style.position = 'relative';
+  block.appendChild(btn);
+});
+
+// Ctrl+K search focus
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('pageSearch').focus();
+  }
+});
+
+// Page search — scroll to first match & highlight
+const searchInput = document.getElementById('pageSearch');
+let highlights = [];
+
+function clearHighlights() {
+  highlights.forEach(el => {
+    const parent = el.parentNode;
+    parent.replaceChild(document.createTextNode(el.textContent), el);
+    parent.normalize();
+  });
+  highlights = [];
+}
+
+function highlightText(node, term) {
+  if (node.nodeType === 3) {
+    const idx = node.textContent.toLowerCase().indexOf(term.toLowerCase());
+    if (idx >= 0) {
+      const span = document.createElement('span');
+      span.className = 'highlight-match';
+      const matched = node.splitText(idx);
+      matched.splitText(term.length);
+      const clone = matched.cloneNode(true);
+      span.appendChild(clone);
+      matched.parentNode.replaceChild(span, matched);
+      highlights.push(span);
+      return true;
+    }
+  } else if (node.nodeType === 1 && node.childNodes && !/(script|style|input)/i.test(node.tagName) && !node.classList.contains('highlight-match')) {
+    for (let i = 0; i < node.childNodes.length; i++) {
+      if (highlightText(node.childNodes[i], term)) {
+        i++;
+      }
+    }
+  }
+  return false;
+}
+
+let searchTimeout;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    clearHighlights();
+    const term = searchInput.value.trim();
+    if (term.length < 2) return;
+    highlightText(document.querySelector('.container'), term);
+    if (highlights.length > 0) {
+      highlights[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 300);
+});
+</script>
+</body>
+</html>
