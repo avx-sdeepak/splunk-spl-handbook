@@ -1,0 +1,10 @@
+# Splunk SPL Handbook — HTML to PowerPoint Converter
+# Install: pip install -r requirements.txt
+
+python-pptx>=0.6.21       # PowerPoint generation
+beautifulsoup4>=4.12.0    # HTML parsing
+lxml>=4.9.0               # HTML/XML parser backend
+
+# Optional — only needed for OneDrive upload (--upload flag)
+msal>=1.24.0              # Microsoft Authentication Library
+requests>=2.31.0          # HTTP client for Graph API
